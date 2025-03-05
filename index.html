@@ -10,7 +10,7 @@
         function addRow() {
             const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
             const newRow = table.insertRow();
-            const columns = ['Column1', 'Column2', 'Column3']; // Adjust column names as needed
+            const columns = ['Column1', 'Column2', 'Column3', 'Column4', 'Column5', 'Column6', 'Column7']; // Adjust column names as needed
             columns.forEach(() => {
                 const newCell = newRow.insertCell();
                 const input = document.createElement('input');
@@ -42,6 +42,12 @@
             const userID = document.getElementById('userID').value;
             const password = document.getElementById('password').value;
             const data = captureTableData();
+            const PeopleSoftSiteName = document.getElementById('PeopleSoftSiteName').value;
+            const submitDataAsBlank = document.getElementById('node').value;
+            const languageCode = document.getElementById('language_code').value;
+            const chunkingFactor = document.getElementById('chunkingFactor').value;
+            const action = document.getElementById('action')
+
 
             if (!userID || !password) {
                 alert("Please enter User ID and Password.");
@@ -85,6 +91,10 @@
                             <th>Column1</th>
                             <th>Column2</th>
                             <th>Column3</th>
+                            <th>Column4</th>
+                            <th>Column5</th>
+                            <th>Column6</th>
+                            <th>Column7</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -100,15 +110,36 @@
                 <h4>PeopleSoft Connection Settings</h4>
                 <label>Server:</label>
                 <input type="text" id="server" class="form-control" value="s-wps92dweb2.sonomacounty.ca.gov">
+
+                <label>Portal:</label>
+                <input type="text" id="portal" class="form-control" value="EMPLOYEE">
+
+                <label>PeopleSoft Site Name:</label>
+                <input type="text" id="PeopleSoftSiteName" class="form-control" value="FN92UAT">
+
+                <label>Node:</label>
+                <input type="text" id="node" class="form-control" value="PSFT_EP">
+
+                <label>Language Code:</label>
+                <input type="text" id="language_code" class="form-control" value="ENG">
                 
                 <label>Port:</label>
                 <input type="text" id="port" class="form-control" value="7750">
                 
                 <label>Protocol:</label>
                 <input type="text" id="protocol" class="form-control" value="https">
+
+                <label>Chunking Factor:</label>
+                <input type="text" id="chunkingFactor" class="form-control" value="40">
+
+                <label>Submit Blanks as Input:</label>
+                <input type="text" id="node" class="form-control" value="No">
+
+                <label>Action:</label>
+                <input type="text" id="action" class="form-control" value="UPDATEDATA">
                 
                 <label>User ID:</label>
-                <input type="text" id="userID" class="form-control" value="admin">
+                <input type="text" id="userID" class="form-control" value="">
                 
                 <label>Password:</label>
                 <input type="password" id="password" class="form-control">
