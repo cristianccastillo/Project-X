@@ -11,6 +11,7 @@
             const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
             const newRow = table.insertRow();
             const columns = ['Column1', 'Column2', 'Column3', 'Column4', 'Column5', 'Column6', 'Column7']; // Adjust column names as needed
+
             columns.forEach(() => {
                 const newCell = newRow.insertCell();
                 const input = document.createElement('input');
@@ -34,51 +35,42 @@
             return data;
         }
 
-        // Function to submit data to the PeopleSoft server
-        async function submitData() {
+        // Function to send a test "hi" message to PeopleSoft
+        async function sendTestMessage() {
             const server = document.getElementById('server').value;
             const port = document.getElementById('port').value;
             const protocol = document.getElementById('protocol').value;
             const userID = document.getElementById('userID').value;
             const password = document.getElementById('password').value;
-            const data = captureTableData();
-            const PeopleSoftSiteName = document.getElementById('PeopleSoftSiteName').value;
-            const submitDataAsBlank = document.getElementById('node').value;
-            const languageCode = document.getElementById('language_code').value;
-            const chunkingFactor = document.getElementById('chunkingFactor').value;
-            const action = document.getElementById('action')
+            const serviceOperation = "YourServiceOperation.v1"; // Replace with actual service operation
 
-
-            if (!userID || !password) {
-                alert("Please enter User ID and Password.");
-                return;
-            }
+            const message = { greeting: 'hi' };
 
             try {
-                const response = await fetch(`${protocol}://${server}:${port}/PSIGW/PeopleSoftListeningConnector`, {
-                    method: "POST",
+                const response = await fetch(`${protocol}://${server}:${port}/PSIGW/RESTListeningConnector/${serviceOperation}/`, {
+                    method: 'POST',
                     headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": "Basic " + btoa(`${userID}:${password}`)
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic ' + btoa(`${userID}:${password}`)
                     },
-                    body: JSON.stringify({ data: data })
+                    body: JSON.stringify(message)
                 });
 
                 if (response.ok) {
                     const result = await response.json();
-                    alert("Data submitted successfully: " + result.message);
+                    alert('Message sent successfully: ' + JSON.stringify(result));
                 } else {
                     const errorText = await response.text();
-                    alert("Error submitting data: " + errorText);
+                    alert('Error sending message: ' + errorText);
                 }
             } catch (error) {
-                alert("Network error: " + error.message);
+                alert('Network error: ' + error.message);
             }
         }
+
     </script>
 </head>
 <body class="bg-light">
-
     <div class="container mt-5">
         <h1 class="text-center">Excel to CI Tool</h1>
 
@@ -109,7 +101,7 @@
             <div class="col-md-6">
                 <h4>PeopleSoft Connection Settings</h4>
                 <label>Server:</label>
-                <input type="text" id="server" class="form-control" value="s-wps92dweb2.sonomacounty.ca.gov">
+                <input type="text" id="server" class="form-control" value="your_peoplesoft_server">
 
                 <label>Portal:</label>
                 <input type="text" id="portal" class="form-control" value="EMPLOYEE">
@@ -122,10 +114,10 @@
 
                 <label>Language Code:</label>
                 <input type="text" id="language_code" class="form-control" value="ENG">
-                
+
                 <label>Port:</label>
-                <input type="text" id="port" class="form-control" value="7750">
-                
+                <input type="text" id="port" class="form-control" value="your_port">
+
                 <label>Protocol:</label>
                 <input type="text" id="protocol" class="form-control" value="https">
 
@@ -137,10 +129,10 @@
 
                 <label>Action:</label>
                 <input type="text" id="action" class="form-control" value="UPDATEDATA">
-                
+
                 <label>User ID:</label>
                 <input type="text" id="userID" class="form-control" value="">
-                
+
                 <label>Password:</label>
                 <input type="password" id="password" class="form-control">
             </div>
@@ -148,10 +140,9 @@
 
         <div class="row mt-4">
             <div class="col-md-12">
-                <button class="btn btn-danger" onclick="submitData()">Submit Data</button>
+                <button class="btn btn-danger" onclick="sendTestMessage()">Send "hi" Message</button>
             </div>
         </div>
     </div>
-
 </body>
 </html>
