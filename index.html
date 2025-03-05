@@ -37,37 +37,41 @@
 
         // Function to send a test "hi" message to PeopleSoft
         async function sendTestMessage() {
-            const server = document.getElementById('server').value;
-            const port = document.getElementById('port').value;
-            const protocol = document.getElementById('protocol').value;
+            const server = "efsuat92.sonomacounty.ca.gov";  // Your actual PeopleSoft server
             const userID = document.getElementById('userID').value;
             const password = document.getElementById('password').value;
-            const serviceOperation = "YourServiceOperation.v1"; // Replace with actual service operation
+            const serviceOperation = "YourServiceOperation.v1"; // Replace with actual service operation name
 
-            const message = { greeting: 'hi' };
+            const apiUrl = `https://${server}/PSIGW/RESTListeningConnector/${serviceOperation}`;
+
+            const message = { greeting: "hi" };
+
+            if (!userID || !password) {
+                alert("Please enter User ID and Password.");
+                return;
+            }
 
             try {
-                const response = await fetch(`${protocol}://${server}:${port}/PSIGW/RESTListeningConnector/${serviceOperation}/`, {
-                    method: 'POST',
+                const response = await fetch(apiUrl, {
+                    method: "POST",
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Basic ' + btoa(`${userID}:${password}`)
+                        "Content-Type": "application/json",
+                        "Authorization": "Basic " + btoa(`${userID}:${password}`)
                     },
                     body: JSON.stringify(message)
                 });
 
                 if (response.ok) {
                     const result = await response.json();
-                    alert('Message sent successfully: ' + JSON.stringify(result));
+                    alert("Message sent successfully: " + JSON.stringify(result));
                 } else {
                     const errorText = await response.text();
-                    alert('Error sending message: ' + errorText);
+                    alert("Error sending message: " + errorText);
                 }
             } catch (error) {
-                alert('Network error: ' + error.message);
+                alert("Network error: " + error.message);
             }
         }
-
     </script>
 </head>
 <body class="bg-light">
@@ -101,7 +105,7 @@
             <div class="col-md-6">
                 <h4>PeopleSoft Connection Settings</h4>
                 <label>Server:</label>
-                <input type="text" id="server" class="form-control" value="your_peoplesoft_server">
+                <input type="text" id="server" class="form-control" value="efsuat92.sonomacounty.ca.gov">
 
                 <label>Portal:</label>
                 <input type="text" id="portal" class="form-control" value="EMPLOYEE">
@@ -114,12 +118,6 @@
 
                 <label>Language Code:</label>
                 <input type="text" id="language_code" class="form-control" value="ENG">
-
-                <label>Port:</label>
-                <input type="text" id="port" class="form-control" value="your_port">
-
-                <label>Protocol:</label>
-                <input type="text" id="protocol" class="form-control" value="https">
 
                 <label>Chunking Factor:</label>
                 <input type="text" id="chunkingFactor" class="form-control" value="40">
