@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -124,6 +125,8 @@
             const server = document.getElementById('server').value;
             const port = document.getElementById('port').value;
             const protocol = document.getElementById('protocol').value;
+            const node = document.getElementById('node').value;
+            const psSiteName = document.getElementById('psSiteName').value;
             const serviceOperation = "YourServiceOperation.v1"; // Replace with actual service operation
 
             if (!userID || !password) {
@@ -134,6 +137,9 @@
             // Data to be sent
             const postData = {
                 message: "hi from web",
+                connectionDetails: {
+                    server, port, protocol, node, psSiteName, userID
+                },
                 tableData: captureTableData()
             };
 
@@ -196,6 +202,12 @@
                     <label>Protocol:</label>
                     <input type="text" id="protocol" class="form-control" value="https">
 
+                    <label>PeopleSoft Site Name:</label>
+                    <input type="text" id="psSiteName" class="form-control" value="FN92UAT">
+
+                    <label>Node:</label>
+                    <input type="text" id="node" class="form-control" value="PSFT_EP">
+
                     <label>User ID:</label>
                     <input type="text" id="userID" class="form-control">
 
@@ -215,3 +227,5 @@
 </body>
 </html>
 
+Sent from my Verizon, Samsung Galaxy smartphone
+Get Outlook for Android
