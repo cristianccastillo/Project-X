@@ -5,28 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Excel to CI Tool</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Scrollable Table Container */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            white-space: nowrap;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        table {
+            width: auto;
+        }
+
+        th, td {
+            min-width: 100px;
+            text-align: center;
+        }
+    </style>
     <script>
-        // Function to add a new row to the table
+        // Function to generate initial columns dynamically
+        function createInitialColumns() {
+            const table = document.getElementById('dataTable');
+            const thead = table.getElementsByTagName('thead')[0];
+            const headerRow = thead.insertRow();
+
+            for (let i = 1; i <= 77; i++) {
+                let th = document.createElement('th');
+                th.innerHTML = `Column ${i} <button class="btn btn-sm btn-danger" onclick="deleteColumn(${i})">X</button>`;
+                th.id = `col-${i}`;
+                headerRow.appendChild(th);
+            }
+        }
+
+        // Function to add a new row
         function addRow() {
             const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
             const newRow = table.insertRow();
-            const columns = ['Column1', 'Column2', 'Column3', 'Column4', 'Column5', 'Column6', 'Column7']; // Adjust column names as needed
 
-            columns.forEach(() => {
-                const newCell = newRow.insertCell();
-                const input = document.createElement('input');
+            for (let i = 1; i <= 77; i++) {
+                let newCell = newRow.insertCell();
+                let input = document.createElement('input');
                 input.type = 'text';
                 input.className = 'form-control';
                 newCell.appendChild(input);
-            });
+            }
+        }
+
+        // Function to delete a column
+        function deleteColumn(colIndex) {
+            const table = document.getElementById('dataTable');
+            const header = document.getElementById(`col-${colIndex}`);
+            if (header) header.remove(); // Remove header column
+
+            // Remove column from all rows
+            const rows = table.getElementsByTagName('tbody')[0].rows;
+            for (let row of rows) {
+                if (row.cells[colIndex - 1]) row.deleteCell(colIndex - 1);
+            }
         }
 
         // Function to capture table data into an array
         function captureTableData() {
             const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
             const data = [];
+
             for (let row of table.rows) {
-                const rowData = [];
+                let rowData = [];
                 for (let cell of row.cells) {
                     rowData.push(cell.firstChild.value);
                 }
@@ -35,43 +81,46 @@
             return data;
         }
 
-        // Function to send a test "hi" message to PeopleSoft
-        async function sendTestMessage() {
-            const server = "efsuat92.sonomacounty.ca.gov";  // Your actual PeopleSoft server
+        // Function to submit data to PeopleSoft
+        async function submitData() {
             const userID = document.getElementById('userID').value;
             const password = document.getElementById('password').value;
-            const serviceOperation = "YourServiceOperation.v1"; // Replace with actual service operation name
-
-            const apiUrl = `https://${server}/PSIGW/RESTListeningConnector/${serviceOperation}`;
-
-            const message = { greeting: "hi" };
 
             if (!userID || !password) {
                 alert("Please enter User ID and Password.");
                 return;
             }
 
+            // Data to be sent
+            const postData = {
+                message: "hi from web",
+                tableData: captureTableData()
+            };
+
             try {
-                const response = await fetch(apiUrl, {
+                const response = await fetch("https://efsuat92.sonomacounty.ca.gov/PSIGW/RESTListeningConnector/YourServiceOperation.v1", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": "Basic " + btoa(`${userID}:${password}`)
                     },
-                    body: JSON.stringify(message)
+                    body: JSON.stringify(postData)
                 });
 
                 if (response.ok) {
                     const result = await response.json();
-                    alert("Message sent successfully: " + JSON.stringify(result));
+                    alert("Data submitted successfully: " + JSON.stringify(result));
                 } else {
                     const errorText = await response.text();
-                    alert("Error sending message: " + errorText);
+                    alert("Error submitting data: " + errorText);
                 }
             } catch (error) {
                 alert("Network error: " + error.message);
             }
         }
+
+        // Initialize columns on page load
+        window.onload = createInitialColumns;
     </script>
 </head>
 <body class="bg-light">
@@ -81,53 +130,19 @@
         <div class="row mt-4">
             <div class="col-md-12">
                 <h3>Enter Data</h3>
-                <table id="dataTable" class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Column1</th>
-                            <th>Column2</th>
-                            <th>Column3</th>
-                            <th>Column4</th>
-                            <th>Column5</th>
-                            <th>Column6</th>
-                            <th>Column7</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Rows will be added here -->
-                    </tbody>
-                </table>
-                <button class="btn btn-secondary" onclick="addRow()">Add Row</button>
+                <div class="table-container">
+                    <table id="dataTable" class="table table-bordered">
+                        <thead></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <button class="btn btn-secondary mt-2" onclick="addRow()">Add Row</button>
             </div>
         </div>
 
         <div class="row mt-4">
             <div class="col-md-6">
                 <h4>PeopleSoft Connection Settings</h4>
-                <label>Server:</label>
-                <input type="text" id="server" class="form-control" value="efsuat92.sonomacounty.ca.gov">
-
-                <label>Portal:</label>
-                <input type="text" id="portal" class="form-control" value="EMPLOYEE">
-
-                <label>PeopleSoft Site Name:</label>
-                <input type="text" id="PeopleSoftSiteName" class="form-control" value="FN92UAT">
-
-                <label>Node:</label>
-                <input type="text" id="node" class="form-control" value="PSFT_EP">
-
-                <label>Language Code:</label>
-                <input type="text" id="language_code" class="form-control" value="ENG">
-
-                <label>Chunking Factor:</label>
-                <input type="text" id="chunkingFactor" class="form-control" value="40">
-
-                <label>Submit Blanks as Input:</label>
-                <input type="text" id="node" class="form-control" value="No">
-
-                <label>Action:</label>
-                <input type="text" id="action" class="form-control" value="UPDATEDATA">
-
                 <label>User ID:</label>
                 <input type="text" id="userID" class="form-control" value="">
 
@@ -138,7 +153,7 @@
 
         <div class="row mt-4">
             <div class="col-md-12">
-                <button class="btn btn-danger" onclick="sendTestMessage()">Send "hi" Message</button>
+                <button class="btn btn-danger" onclick="submitData()">Submit</button>
             </div>
         </div>
     </div>
