@@ -6,13 +6,26 @@
     <title>Excel to CI Tool</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Scrollable Table Container */
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Scrollable Table */
         .table-container {
-            width: 100%;
+            max-width: 100%;
             overflow-x: auto;
             white-space: nowrap;
             border: 1px solid #ddd;
             padding: 10px;
+            border-radius: 5px;
+            background-color: #fff;
         }
 
         table {
@@ -20,8 +33,19 @@
         }
 
         th, td {
-            min-width: 100px;
+            min-width: 120px;
             text-align: center;
+        }
+
+        .btn-delete-col {
+            margin-left: 5px;
+            color: red;
+            cursor: pointer;
+        }
+
+        .btn-delete-row {
+            color: red;
+            cursor: pointer;
         }
     </style>
     <script>
@@ -33,7 +57,7 @@
 
             for (let i = 1; i <= 77; i++) {
                 let th = document.createElement('th');
-                th.innerHTML = `Column ${i} <button class="btn btn-sm btn-danger" onclick="deleteColumn(${i})">X</button>`;
+                th.innerHTML = `Column ${i} <span class="btn-delete-col" onclick="deleteColumn(${i})">✖</span>`;
                 th.id = `col-${i}`;
                 headerRow.appendChild(th);
             }
@@ -43,7 +67,7 @@
         function addRow() {
             const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
             const newRow = table.insertRow();
-
+            
             for (let i = 1; i <= 77; i++) {
                 let newCell = newRow.insertCell();
                 let input = document.createElement('input');
@@ -51,6 +75,10 @@
                 input.className = 'form-control';
                 newCell.appendChild(input);
             }
+
+            // Add delete row button
+            let deleteCell = newRow.insertCell();
+            deleteCell.innerHTML = `<span class="btn-delete-row" onclick="deleteRow(this)">✖</span>`;
         }
 
         // Function to delete a column
@@ -66,6 +94,12 @@
             }
         }
 
+        // Function to delete a row
+        function deleteRow(element) {
+            let row = element.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+        }
+
         // Function to capture table data into an array
         function captureTableData() {
             const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
@@ -74,7 +108,9 @@
             for (let row of table.rows) {
                 let rowData = [];
                 for (let cell of row.cells) {
-                    rowData.push(cell.firstChild.value);
+                    if (cell.firstChild && cell.firstChild.tagName === 'INPUT') {
+                        rowData.push(cell.firstChild.value);
+                    }
                 }
                 data.push(rowData);
             }
@@ -85,6 +121,10 @@
         async function submitData() {
             const userID = document.getElementById('userID').value;
             const password = document.getElementById('password').value;
+            const server = document.getElementById('server').value;
+            const port = document.getElementById('port').value;
+            const protocol = document.getElementById('protocol').value;
+            const serviceOperation = "YourServiceOperation.v1"; // Replace with actual service operation
 
             if (!userID || !password) {
                 alert("Please enter User ID and Password.");
@@ -97,8 +137,10 @@
                 tableData: captureTableData()
             };
 
+            const apiUrl = `${protocol}://${server}:${port}/PSIGW/RESTListeningConnector/${serviceOperation}`;
+
             try {
-                const response = await fetch("https://efsuat92.sonomacounty.ca.gov/PSIGW/RESTListeningConnector/YourServiceOperation.v1", {
+                const response = await fetch(apiUrl, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -123,39 +165,52 @@
         window.onload = createInitialColumns;
     </script>
 </head>
-<body class="bg-light">
+<body>
+
     <div class="container mt-5">
-        <h1 class="text-center">Excel to CI Tool</h1>
+        <div class="container-box">
+            <h1 class="text-center">Excel to CI Tool</h1>
 
-        <div class="row mt-4">
-            <div class="col-md-12">
-                <h3>Enter Data</h3>
-                <div class="table-container">
-                    <table id="dataTable" class="table table-bordered">
-                        <thead></thead>
-                        <tbody></tbody>
-                    </table>
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <h3>Enter Data</h3>
+                    <div class="table-container">
+                        <table id="dataTable" class="table table-bordered">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-secondary mt-2" onclick="addRow()">Add Row</button>
                 </div>
-                <button class="btn btn-secondary mt-2" onclick="addRow()">Add Row</button>
             </div>
-        </div>
 
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <h4>PeopleSoft Connection Settings</h4>
-                <label>User ID:</label>
-                <input type="text" id="userID" class="form-control" value="">
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h4>PeopleSoft Connection Settings</h4>
+                    <label>Server:</label>
+                    <input type="text" id="server" class="form-control" value="efsuat92.sonomacounty.ca.gov">
 
-                <label>Password:</label>
-                <input type="password" id="password" class="form-control">
+                    <label>Port:</label>
+                    <input type="text" id="port" class="form-control" value="7750">
+
+                    <label>Protocol:</label>
+                    <input type="text" id="protocol" class="form-control" value="https">
+
+                    <label>User ID:</label>
+                    <input type="text" id="userID" class="form-control">
+
+                    <label>Password:</label>
+                    <input type="password" id="password" class="form-control">
+                </div>
             </div>
-        </div>
 
-        <div class="row mt-4">
-            <div class="col-md-12">
-                <button class="btn btn-danger" onclick="submitData()">Submit</button>
+            <div class="row mt-4">
+                <div class="col-md-12 text-center">
+                    <button class="btn btn-primary btn-lg" onclick="submitData()">Submit</button>
+                </div>
             </div>
         </div>
     </div>
+
 </body>
 </html>
