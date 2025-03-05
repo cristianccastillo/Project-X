@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel to CI Tool</title>
+    <script>
+        function uploadFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const arrayBuffer = e.target.result;
+                    displayExcel(arrayBuffer);
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        function generateTemplate() {
+            const template = document.getElementById('templateSelect').value;
+            const server = document.getElementById('server').value;
+            const port = document.getElementById('port').value;
+            const protocol = document.getElementById('protocol').value;
+            const userID = document.getElementById('userID').value;
+
+            const wb = XLSX.utils.book_new();
+            const wsData = [
+                ["Setting", "Value"],
+                ["Template Name", template],
+                ["Server", server],
+                ["Port", port],
+                ["Protocol", protocol],
+                ["User ID", userID]
+            ];
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            XLSX.utils.book_append_sheet(wb, ws, "Settings");
+
+            const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+            const blob = new Blob([wbout], { type: "application/octet-stream" });
+            const url = URL.createObjectURL(blob);
+            document.getElementById("filePreview").innerHTML = `
+                <p>Generated File: <a href="${url}" download="Generated_Template.xlsx">Download</a></p>
+            `;
+        }
+
+        function displayExcel(arrayBuffer) {
+            const data = new Uint8Array(arrayBuffer);
+            const workbook = XLSX.read(data, { type: "array" });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const htmlTable = XLSX.utils.sheet_to_html(worksheet);
+            document.getElementById("filePreview").innerHTML = htmlTable;
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+    <h2>Upload or Generate Excel File</h2>
+
+    <h3>Option 1: Upload an Excel File</h3>
+    <input type="file" id="fileInput" accept=".xls,.xlsx" onchange="uploadFile(event)">
+
+    <h3>Option 2: Generate Excel Template</h3>
+    <label for="templateSelect">Choose a Template:</label>
+    <select id="templateSelect">
+        <option value="PSA_ACCT_SETUP_CI">PSA_ACCT_SETUP_CI</option>
+        <option value="PC_ACCT_RULE_UPDATE">PC_ACCT_RULE_UPDATE</option>
+    </select>
+
+    <h3>PeopleSoft Connection Settings</h3>
+    <label>Server:</label> <input type="text" id="server" value="s-wps92dweb2.sonomacounty.ca.gov"><br>
+    <label>Port:</label> <input type="text" id="port" value="7750"><br>
+    <label>Protocol:</label> <input type="text" id="protocol" value="https"><br>
+    <label>User ID:</label> <input type="text" id="userID" value="admin"><br>
+    <button onclick="generateTemplate()">Generate Template</button>
+
+    <h3>File Preview</h3>
+    <div id="filePreview">
+        <p>No file uploaded or generated yet.</p>
+    </div>
+
+</body>
+</html>
