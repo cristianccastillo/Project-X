@@ -34,14 +34,8 @@
         }
 
         th, td {
-            min-width: 120px;
+            min-width: 150px;
             text-align: center;
-        }
-
-        .btn-delete-col {
-            margin-left: 5px;
-            color: red;
-            cursor: pointer;
         }
 
         .btn-delete-row {
@@ -50,49 +44,50 @@
         }
     </style>
     <script>
-        // Function to generate initial columns dynamically
-        function createInitialColumns() {
+        // Column names extracted from "Data Input" sheet
+        const columnNames = [
+            "Status", "PC Business Unit", "Criteria Sequence", "Analysis Type",
+            "Contract", "Project", "Resource GL Bus Unit", "Project Type", "Activity",
+            "Category", "Subcategory", "Description", "Journal Template", "Active Status",
+            "Debit / Credit Indicator", "Distribution Type", "Billing Business Unit", "Account",
+            "Department", "Project Value", "Miscellaneous", "Fund", "Subprogram", "Program",
+            "Subsidiary", "Work Order", "Transitional Cost Accounting"
+        ];
+
+        // Function to generate table headers dynamically
+        function createTableHeaders() {
             const table = document.getElementById('dataTable');
             const thead = table.getElementsByTagName('thead')[0];
             const headerRow = thead.insertRow();
 
-            for (let i = 1; i <= 77; i++) {
+            columnNames.forEach(colName => {
                 let th = document.createElement('th');
-                th.innerHTML = `Column ${i} <span class="btn-delete-col" onclick="deleteColumn(${i})">✖</span>`;
-                th.id = `col-${i}`;
+                th.innerText = colName;
                 headerRow.appendChild(th);
-            }
+            });
+
+            // Add empty column for the delete row button
+            let th = document.createElement('th');
+            th.innerText = "Actions";
+            headerRow.appendChild(th);
         }
 
         // Function to add a new row
         function addRow() {
             const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
             const newRow = table.insertRow();
-            
-            for (let i = 1; i <= 77; i++) {
+
+            columnNames.forEach(() => {
                 let newCell = newRow.insertCell();
                 let input = document.createElement('input');
                 input.type = 'text';
                 input.className = 'form-control';
                 newCell.appendChild(input);
-            }
+            });
 
             // Add delete row button
             let deleteCell = newRow.insertCell();
             deleteCell.innerHTML = `<span class="btn-delete-row" onclick="deleteRow(this)">✖</span>`;
-        }
-
-        // Function to delete a column
-        function deleteColumn(colIndex) {
-            const table = document.getElementById('dataTable');
-            const header = document.getElementById(`col-${colIndex}`);
-            if (header) header.remove(); // Remove header column
-
-            // Remove column from all rows
-            const rows = table.getElementsByTagName('tbody')[0].rows;
-            for (let row of rows) {
-                if (row.cells[colIndex - 1]) row.deleteCell(colIndex - 1);
-            }
         }
 
         // Function to delete a row
@@ -107,12 +102,10 @@
             const data = [];
 
             for (let row of table.rows) {
-                let rowData = [];
-                for (let cell of row.cells) {
-                    if (cell.firstChild && cell.firstChild.tagName === 'INPUT') {
-                        rowData.push(cell.firstChild.value);
-                    }
-                }
+                let rowData = {};
+                columnNames.forEach((colName, index) => {
+                    rowData[colName] = row.cells[index].firstChild.value;
+                });
                 data.push(rowData);
             }
             return data;
@@ -167,8 +160,8 @@
             }
         }
 
-        // Initialize columns on page load
-        window.onload = createInitialColumns;
+        // Initialize table headers on page load
+        window.onload = createTableHeaders;
     </script>
 </head>
 <body>
